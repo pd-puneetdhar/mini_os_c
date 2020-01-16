@@ -21,8 +21,11 @@
     <ClInclude Include="common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="os_task.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="main.c" />
+    <None Include="main.cpp" />
   </ItemGroup>
 </Project>

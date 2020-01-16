@@ -1,7 +1,12 @@
 #pragma once
 
-typedef enum result {
+
+typedef enum e_result {
 	e_start = -1,
 	e_pass,
 	e_fail
-} t_result;
+} result;
+
+typedef unsigned int u32;
+typedef unsigned long long u64;
+
