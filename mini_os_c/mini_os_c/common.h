@@ -2,7 +2,7 @@
 
 
 typedef enum e_result {
-	e_start = -1,
+	e_none = -1,
 	e_pass,
 	e_fail
 } result;

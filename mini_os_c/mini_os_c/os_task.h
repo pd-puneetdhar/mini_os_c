@@ -1,11 +1,25 @@
 #pragma once
 #include "common.h"
 
+namespace ostask {
 
-typedef void (*arg0_task)(void);
+	typedef enum status {
+		init,
+		completed,
+		failed
+	}status;
 
-typedef struct os_task {
-	u32 id;
-	arg0_task task;
-} os_task;
+	typedef u32 id;
 
+	typedef void (*task)(void);
+
+	typedef struct os_task {
+
+		id _id;
+		task _task;
+		status _status;
+	} os_task;
+
+
+
+}
