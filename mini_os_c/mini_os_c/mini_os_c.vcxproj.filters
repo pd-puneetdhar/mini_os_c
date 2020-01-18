@@ -24,6 +24,12 @@
     <ClInclude Include="os_task.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="os_queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="os_scheduler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

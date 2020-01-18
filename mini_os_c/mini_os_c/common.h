@@ -1,5 +1,8 @@
 #pragma once
 
+#define TEST(x) void test_##x()
+#define RUN(x) test::test_##x()
+#define RUN_TESTS run_tests
 
 typedef enum e_result {
 	e_none = -1,
