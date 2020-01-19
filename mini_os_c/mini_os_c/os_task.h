@@ -11,21 +11,33 @@ namespace ostask {
 	} status;
 
 	typedef u32 id;
+	typedef void (*task)(status* s);
 
 	typedef struct os_task {
-		typedef void (*task)(status* s);
 
 		id _id;
 		task _task;
 		status _status;
+		os_task* _next;
+		os_task* _prev;
 
 	} os_task;
 
-	typedef void (*task)(status* s);
+	os_task* next(os_task* t) { return t->_next; }
+	os_task* prev(os_task* t) { return t->_prev; }
 
-	void reset(os_task* t) { t->_status = init; }
-	BOOL pending(os_task* t) { BOOL b = (t->_status == init) ? TRUE : FALSE; return b; }
-	status complete(os_task* t) { t->_task(&t->_status); return t->_status; }
+	void wake(os_task* t) {
+		t->_status = init;
+	}
+
+	BOOL pending(os_task* t) {
+		BOOL b = (t->_status == init) ? TRUE : FALSE; return b;
+	}
+
+	status complete(os_task* t) {
+		t->_task(&t->_status);
+		return t->_status;
+	}
 
 	os_task* create_os_task(id _id, task _task) {
 		os_task* t = (os_task*)malloc(sizeof(os_task));
@@ -51,8 +63,6 @@ namespace test {
 
 	TEST(os_task) {
 
-		using namespace ostask;
-
 		SUBTEST(INIT)
 		{
 			os_task t0 = { 0, fn0, init };
@@ -61,7 +71,7 @@ namespace test {
 			assert(t->_status == ostask::init);
 			assert(complete(t) == ostask::completed);
 			assert(pending(t) == FALSE);
-			reset(t);
+			wake(t);
 			assert(pending(t) == TRUE);
 		}
 
@@ -87,7 +97,7 @@ namespace test {
 			assert(pending(t2) == TRUE);
 			assert(complete(t2) == completed);
 			assert(pending(t2) == FALSE);
-			reset(t2);
+			wake(t2);
 			assert(pending(t2) == TRUE);
 			assert(complete(t2) == completed);
 			assert(pending(t2) == FALSE);

@@ -22,6 +22,7 @@ typedef enum e_bool {
 #define TRUE e_true
 #define FALSE e_false
 
+typedef unsigned char u8;
+typedef unsigned short int u16;
 typedef unsigned int u32;
 typedef unsigned long long u64;
-
