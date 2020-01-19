@@ -6,6 +6,8 @@
 namespace osq {
 	using namespace ostask;
 
+	const u8 outstanding = 30;
+
 	typedef struct os_queue {
 		os_task* mp_front;
 		os_task* mp_back;
@@ -14,10 +16,9 @@ namespace osq {
 
 	os_queue* create_queue() {
 		os_queue* q = (os_queue*)(malloc(sizeof(os_queue)));
+		assert(q != 0);
 		q->size = 0;
 		q->mp_back = q->mp_front = 0;
-
-		assert(q != 0);
 		return q;
 	}
 
@@ -28,7 +29,7 @@ namespace osq {
 
 	BOOL push(os_queue* q, os_task* t) {
 
-		if (q->size > 30) {
+		if (q->size > outstanding) {
 			return FALSE;
 		}
 
@@ -74,8 +75,10 @@ namespace osq {
 }
 
 namespace test {
+
 	using namespace ostask;
 	using namespace osq;
+
 	void fn(status* s) { *s = completed; }
 
 	TEST(os_queue) {
@@ -94,7 +97,6 @@ namespace test {
 		SUBTEST(push)
 		{
 			assert(t != 0);
-
 			push(q, t);
 			assert(q->size == 1);
 			assert(q->mp_back == t);
@@ -109,6 +111,28 @@ namespace test {
 			assert(q->size == 0);
 			assert(front(q) == 0);
 			assert(back(q) == 0);
+		}
+
+		SUBTEST(size)
+		{
+			os_task* p = create_os_task(0, fn);
+			assert(p != 0);
+
+			for (u8 num = 0; num < outstanding + 1; ) {
+				push(q, p);
+				num++;
+				p = create_os_task(num, fn);
+				assert(p != 0);
+			}
+
+			assert(q->size == outstanding);
+
+			while (q->size != 0) {
+				os_task* d = pop(q);
+				assert(d != 0);
+				free(d);
+				d = 0;
+			}
 		}
 	}
 }
