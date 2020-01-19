@@ -18,7 +18,11 @@ namespace osq {
 
 	u8 size(os_queue* q) { return q->size; }
 
-	void push(os_queue* q, os_task* t) {
+	BOOL push(os_queue* q, os_task* t) {
+
+		if (q->size > 30) {
+			return FALSE;
+		}
 
 		t->_next = back(q);
 		t->_prev = 0;
@@ -26,11 +30,13 @@ namespace osq {
 		q->mp_back = t;
 		q->size++;
 
-		return;
+		return TRUE;
 
 	}
 
 	os_task* pop(os_queue* q) {
+
+		if (q->size == 0) { return 0; }
 
 		os_task* t = front(q);
 		os_task* p = prev(t);
@@ -39,6 +45,7 @@ namespace osq {
 		p->_next = 0;
 
 		q->size--;
+
 		return  t;
 
 	}
@@ -51,12 +58,34 @@ namespace test {
 
 	TEST(os_queue) {
 
-		os_queue q;
+		os_queue q = { 0, 0, 0 };
 
-		SUBTEST(INIT) {
-			os_task* t = create_os_task(0, fn);
-			assert(t != 0); push(&q, t);
+		SUBTEST(init)
+		{
+			assert(q.mp_front == 0);
+			assert(q.mp_back == 0);
+			assert(q.size == 0);
 		}
 
+		SUBTEST(push)
+		{
+			os_task* t = create_os_task(0, fn);
+			assert(t != 0);
+
+			push(&q, t);
+			assert(q.size == 1);
+			assert(q.mp_back == t);
+			assert(q.mp_front == t);
+
+		}
+
+		SUBTEST(pop)
+		{
+			os_task* p = pop(&q);
+			assert(p != 0);
+			assert(q.size == 0);
+			assert(front(&q) == 0);
+			assert(back(&q) == 0);
+		}
 	}
 }
