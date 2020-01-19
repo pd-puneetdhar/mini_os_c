@@ -1,9 +1,8 @@
 #pragma once
 #include "os_task.h"
 
-
-
 namespace osq {
+
 	using namespace ostask;
 
 	const u8 outstanding = 30;
@@ -28,24 +27,25 @@ namespace osq {
 	u8 size(os_queue* q) { return q->size; }
 
 	BOOL push(os_queue* q, os_task* t) {
-
-		if (q->size > outstanding) {
+		if (q->size == outstanding) {
 			return FALSE;
 		}
+
+		assert(q->size < outstanding);
 
 		if (q->size == 0) {
 			q->mp_back = t;
 			q->mp_front = t;
 		}
-
-		t->_next = back(q);
+		os_task* bck = back(q);
+		t->_next = bck;
+		bck->_prev = t;
 		t->_prev = 0;
 
 		q->mp_back = t;
 		q->size++;
 
 		return TRUE;
-
 	}
 
 	os_task* pop(os_queue* q) {
@@ -53,24 +53,19 @@ namespace osq {
 		if (q->size == 0) { return 0; }
 
 		os_task* t = front(q);
-
 		q->size--;
 
 		if (q->size > 0) {
-
 			os_task* p = prev(t);
-
 			q->mp_front = p;
 			t->_prev = 0;
 			p->_next = 0;
-
 		}
 		else {
 			q->mp_back = q->mp_front = 0;
 		}
 
 		return t;
-
 	}
 }
 
@@ -82,10 +77,8 @@ namespace test {
 	void fn(status* s) { *s = completed; }
 
 	TEST(os_queue) {
-
 		os_queue* q = create_queue();
 		os_task* t = create_os_task(0, fn);
-
 
 		SUBTEST(init)
 		{
@@ -101,7 +94,6 @@ namespace test {
 			assert(q->size == 1);
 			assert(q->mp_back == t);
 			assert(q->mp_front == t);
-
 		}
 
 		SUBTEST(pop)
@@ -118,8 +110,10 @@ namespace test {
 			os_task* p = create_os_task(0, fn);
 			assert(p != 0);
 
-			for (u8 num = 0; num < outstanding + 1; ) {
-				push(q, p);
+			for (u8 num = 0; num < outstanding + 1;) {
+				if (push(q, p) == FALSE) {
+					break;
+				}
 				num++;
 				p = create_os_task(num, fn);
 				assert(p != 0);
